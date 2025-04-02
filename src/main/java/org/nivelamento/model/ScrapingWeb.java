@@ -1,25 +1,29 @@
 package org.nivelamento.model;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class ScrapingWeb {
-
+    private final String ARQUIVOS_ZIP_DIR = "util/arquivoscompactados/";
     private final String URL_SITE = "https://www.gov.br/ans/pt-br/acesso-a-informacao/participacao-da-sociedade/atualizacao-do-rol-de-procedimentos";
     private final String DOWNLOAD_DIR = "downloads/";
+
+    private final String DADOS_PATH = "util";
 
 
     public List<File> downloadAnexosIeIIemPDF() {
@@ -75,10 +79,6 @@ public class ScrapingWeb {
         return downloadFiles;
     }
 
-    public void compactaAnexosEmArquivoZIP() {
-
-    }
-
     private File downloadFile(String fileUrl, String saveDir) {
 
         try {
@@ -96,18 +96,50 @@ public class ScrapingWeb {
         }
     }
 
-    public void zipArquivos(List<File> files, String zipFileName) throws IOException {
+    public void zipArquivos(String nomeArquivoZip) throws IOException {
 
-        String zipFilePath = DOWNLOAD_DIR + File.separator + zipFileName;
+        Path anexoI = Paths.get(DOWNLOAD_DIR, "Anexo_I_Rol_2021RN_465.2021_RN627L.2024.pdf");
+        Path anexoII = Paths.get(DOWNLOAD_DIR, "Anexo_II_DUT_2021_RN_465.2021_RN628.2025_RN629.2025.pdf");
 
-        try (ZipArchiveOutputStream zipOut = new ZipArchiveOutputStream(new FileOutputStream(zipFilePath))) {
-            for (File file : files) {
-                ZipArchiveEntry entry = new ZipArchiveEntry(file, file.getName());
-                zipOut.putArchiveEntry(entry);
-                Files.copy(file.toPath(), zipOut);
-                zipOut.closeArchiveEntry();
+        Path caminhoZip = Paths.get(ARQUIVOS_ZIP_DIR, nomeArquivoZip + ".zip");
+
+        if (!Files.exists(anexoI) || !Files.exists(anexoII)) {
+            System.out.println("Erro: Arquivo PDF não encontrado");
+            return;
+        }
+
+        Files.createDirectories(caminhoZip.getParent());
+
+        if (Files.exists(caminhoZip)) {
+            Files.delete(caminhoZip);
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(caminhoZip.toFile());
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
+
+            Path[] arquivos = { anexoI, anexoII };
+
+            for (Path arquivo : arquivos) {
+                try (FileInputStream fis = new FileInputStream(arquivo.toFile())) {
+
+                    ZipEntry zipEntry = new ZipEntry(arquivo.getFileName().toString());
+                    zos.putNextEntry(zipEntry);
+
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = fis.read(buffer)) > 0) {
+                        zos.write(buffer, 0, length);
+                    }
+
+                    zos.closeEntry();
+                }
             }
-            zipOut.finish();
+
+            System.out.println("Arquivos compactados com sucesso: " + caminhoZip);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao compactar arquivo");
         }
     }
 }
