@@ -50,4 +50,9 @@ Obs: Tentei utilizar diversos processos afim de melhorar as queries em geral<br>
 
 No entanto não tive exito ao tentar elaborar as queries, tendo em vista o  **erro: Lost connection to MySQL serving during query** persistir ao tentar manipular o acervo de dados.
 
-Todos os scripts estão na pasta [**📁util/desafio_3_itens_necessarios/...**]()
+Todos os scripts estão na pasta [**📁util/desafio_3_itens_necessarios/...**](https://github.com/danilohsaraiva/intuitivecare_nivelamento/tree/main/util/desafio_3_itens_necessarios)
+
+### 4. Teste de API
+_Desenvolva uma interface web usando Vue.js que interaja com um servidor em Python_
+#### ? Crie um servidor com uma rota que realize uma busca textual na lista de cadastros de operadoras ([**📃Relatorio_codap.csv**](https://github.com/danilohsaraiva/intuitivecare_nivelamento/blob/main/util/desafio_3_itens_necessarios/Relatorio_cadop.csv)) e retorne os registros mais relevantes.<br>
+#### ?. Elabore uma coleção no Postman para demonstrar o resultado.
